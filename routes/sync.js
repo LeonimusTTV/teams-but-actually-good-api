@@ -3,8 +3,8 @@ const router = express.Router();
 const checkJWT = require('../middleware/auth');
 const userData = require('../models/userData');
 
-router.get("/upload", checkJWT, async (req, res) => {
-  let { data } = req.query;
+router.post("/upload", checkJWT, async (req, res) => {
+  let { data } = req.body;
 
   if (!data) {
     return res.status(400).json({ error: "Missing data parameter" });
