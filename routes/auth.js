@@ -58,7 +58,7 @@ router.get("/discord/callback", async function (req, res, next) {
       console.error("JWT generation error:", err);
       return res.status(500).json({ error: "Failed to generate JWT" });
     }
-    res.cookie('token', token, { httpOnly: true, sameSite: "lax", secure: true });
+    res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
     res.json({ message: "Authentication successful" });
   });
 })
