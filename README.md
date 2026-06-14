@@ -2,6 +2,8 @@
 
 A small API to sync plugin data to MongoDB, allowing retrieval across browsers and devices. Authentication is handled via Discord OAuth2.
 
+This projet is for [Teams but actually good](https://github.com/LeonimusTTV/teams-but-actually-good)
+
 ## Requirements
 
 - [Bun](https://bun.sh) or Node.js
