@@ -1,0 +1,19 @@
+{
+  "name": "teams-but-actually-good-api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "@infisical/sdk": "=5.0.2",
+    "cookie-parser": "=1.4.7",
+    "debug": "=4.4.3",
+    "dotenv": "=17.4.2",
+    "express": "=5.2.1",
+    "http-errors": "=2.0.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.0",
+    "morgan": "=1.11.0"
+  }
+}
