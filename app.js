@@ -61,6 +61,10 @@ app.use('/v1', indexRouter);
 app.use("/v1/auth", authRouter);
 app.use("/v1/sync", syncRouter);
 
+app.get("/", (req, res) => {
+  res.redirect("/v1")
+})
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

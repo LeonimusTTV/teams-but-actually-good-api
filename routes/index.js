@@ -12,4 +12,8 @@ router.get("/isLoggedIn", checkJWT, (req, res) => {
   }
 });
 
+router.get("/", (req, res) => {
+  res.json({ message: "Welcome to the Teams But Actually Good API (v1)! Check out the website https://teamsbutactuallygood.dev, the doc: https://docs.teamsbutactuallygood.dev/ and the GitHub: https://github.com/LeonimusTTV/teams-but-actually-good" });
+})
+
 module.exports = router;
