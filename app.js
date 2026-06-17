@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const helmet = require('helmet');
 const { InfisicalSDK } = require("@infisical/sdk")
 const mongoose = require('mongoose');
 
@@ -12,6 +13,8 @@ const authRouter = require('./routes/auth');
 const syncRouter = require('./routes/sync');
 
 const app = express();
+app.disable('x-powered-by');
+app.use(helmet());
 
 (async () => {
   const infisicalClient = new InfisicalSDK({
@@ -49,7 +52,7 @@ const app = express();
   console.log("Secrets loaded successfully");
 })();
 
-app.use(logger('dev'));
+app.use(logger(process.env.MODE === 'prod' ? 'combined' : 'dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -70,7 +73,7 @@ app.use(function (err, req, res, next) {
     error: {
       message: err.message,
       status,
-      ...(req.app.get('env') === 'development' && { stack: err.stack }),
+      ...(process.env.MODE !== 'prod' && { stack: err.stack }),
     }
   });
 });
