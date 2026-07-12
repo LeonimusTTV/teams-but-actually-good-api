@@ -1,13 +1,39 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const jwt = require("jsonwebtoken");
 const userData = require('../models/userData');
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+router.use(authLimiter);
+
 router.get('/discord', function (req, res, next) {
-  res.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(process.env.DISCORD_REDIRECT_URI)}&scope=identify`);
+  const state = crypto.randomBytes(16).toString('hex');
+  res.cookie('oauth_state', state, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: true,
+    maxAge: 5 * 60 * 1000,
+  });
+
+  res.redirect(`https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(process.env.DISCORD_REDIRECT_URI)}&scope=identify&state=${state}`);
 });
 
 router.get("/discord/callback", async function (req, res, next) {
+  const { code, state } = req.query;
+  const savedState = req.cookies['oauth_state'];
+  res.clearCookie('oauth_state');
+
+  if (!code || !state || !savedState || state !== savedState) {
+    return res.status(403).json({ error: "Invalid or missing OAuth state" });
+  }
+
   const response = await fetch(`${process.env.DISCORD_API_ENDPOINT}/oauth2/token`, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
@@ -16,7 +42,7 @@ router.get("/discord/callback", async function (req, res, next) {
       client_id: process.env.DISCORD_CLIENT_ID,
       client_secret: process.env.DISCORD_CLIENT_SECRET,
       grant_type: "authorization_code",
-      code: req.query.code,
+      code,
       redirect_uri: process.env.DISCORD_REDIRECT_URI,
     }),
     method: "POST",
@@ -53,7 +79,7 @@ router.get("/discord/callback", async function (req, res, next) {
     return res.status(500).json({ error: "Internal server error" });
   }
 
-  jwt.sign({ id: discordUser.id }, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
+  jwt.sign({ id: discordUser.id }, process.env.JWT_SECRET, { expiresIn: '7d', algorithm: 'HS256' }, (err, token) => {
     if (err) {
       console.error("JWT generation error:", err);
       return res.status(500).json({ error: "Failed to generate JWT" });

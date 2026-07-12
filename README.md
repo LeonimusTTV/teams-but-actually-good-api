@@ -79,7 +79,7 @@ docker run -p 3000:3000 \
 
 All sync routes require a `Authorization: Bearer <token>` header.
 
-| Method | Path                       | Description                      |
-| ------ | -------------------------- | -------------------------------- |
-| `GET`  | `/sync/upload?data=<json>` | Upload plugin data (JSON string) |
-| `GET`  | `/sync/download`           | Download stored plugin data      |
+| Method | Path             | Description                                                                  |
+| ------ | ---------------- | ---------------------------------------------------------------------------- |
+| `POST` | `/sync/upload`   | Upload plugin data (JSON string, sent as `{ "data": "<json>" }` in the body) |
+| `GET`  | `/sync/download` | Download stored plugin data                                                  |

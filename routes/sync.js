@@ -3,20 +3,44 @@ const router = express.Router();
 const checkJWT = require('../middleware/auth');
 const userData = require('../models/userData');
 
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function stripDangerousKeys(value) {
+  if (Array.isArray(value)) {
+    return value.map(stripDangerousKeys);
+  }
+
+  if (value && typeof value === 'object') {
+    const clean = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (DANGEROUS_KEYS.has(key)) continue;
+      clean[key] = stripDangerousKeys(val);
+    }
+    return clean;
+  }
+
+  return value;
+}
+
 router.post("/upload", checkJWT, async (req, res) => {
+  console.log("sync upload request received");
   let { data } = req.body;
 
-  if (!data) {
+  if (!data || typeof data !== 'string') {
     return res.status(400).json({ error: "Missing data parameter" });
   }
 
   try {
-    JSON.parse(data);
+    data = JSON.parse(data);
   } catch (error) {
     return res.status(400).json({ error: "Invalid JSON format" });
   }
 
-  data = JSON.parse(data);
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return res.status(400).json({ error: "data must be a JSON object" });
+  }
+
+  data = stripDangerousKeys(data);
 
   try {
     const user = await userData.findOne({ authId: req.user.id });

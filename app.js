@@ -5,6 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const { InfisicalSDK } = require("@infisical/sdk")
 const mongoose = require('mongoose');
 
@@ -14,7 +15,15 @@ const syncRouter = require('./routes/sync');
 
 const app = express();
 app.disable('x-powered-by');
+app.set('trust proxy', 2);
 app.use(helmet());
+
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+}));
 
 (async () => {
   const infisicalClient = new InfisicalSDK({
